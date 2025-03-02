@@ -1,0 +1,80 @@
+{
+    "server":{
+        "listen": "",
+        "port": 8080
+    },
+
+    "output":
+    {
+        "args-convert": {
+            "alt": "ele",
+            "latitude": "lat",
+            "longitude": "lon",
+            "altitude": "ele",
+            "direction": "dir",
+            "accuracy": "acc",
+            "battery": "batt",
+            "provider": "prov"
+            
+        },
+
+        "file":
+        {
+            "input-args-convert": {
+                "alt": "ele"
+            },
+            "date-subdir": true,
+            
+            "raw":{
+                "save": false,
+                "saved_values": ["device", "timestamp", "lat", "lon", "ele", "spd", "acc", "sat", "batt", "bearing", "eta", "etfa", "eda", "edfa"]
+            },
+
+            "gpx":{
+                "save": false,
+                "saved_extensions": ["spd", "acc", "profile", "batt", "ischarging"]
+            }
+        },
+    
+        "web": [
+            {
+                "enable": false,
+                "url": "https://example.com/api/path",
+                "method": "POST",
+                "content-type": "application/x-www-form-urlencoded",
+
+                "data_form":{
+                    "device": "device",
+                    "latitude": "lat",
+                    "longitude": "lon",
+                    "accuracy": "acc",
+                    "battery": "batt",
+                    "speed": "spd",
+                    "direction": "dir",
+                    "altitude": "ele",
+                    "provider": "prov",
+                    "activity": "act"
+                }
+            },
+            {
+                "enable": false,
+                "url": "https://example.com/api/path2",
+                "method": "GET",
+                "content-type": "application/x-www-form-urlencoded",
+
+                "data_form":{
+                    "device": "device",
+                    "latitude": "lat",
+                    "longitude": "lon"
+                }
+            },
+            {
+                "enable": false,
+                "url": "https://example.com/api/path3",
+                "method": "GET",
+                "content-type": "application/x-www-form-urlencoded",
+                "data_raw_disable": "latitude={lat}&longitude={lon}&device={device}&accuracy={acc}"
+            }
+        ]
+    }
+}

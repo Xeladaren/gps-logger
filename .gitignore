@@ -1,2 +1,9 @@
 /venv/
 /gpx_save/
+__pycache__/
+*.egg-info/
+
+/build/
+/gps_log/
+
+/config.json

@@ -1,0 +1,28 @@
+
+[build-system]
+requires = [
+    "setuptools>=39.2.0",
+    "setuptools_scm[toml]",
+    "setuptools-git-versioning",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+
+name = "gps-logger"
+dynamic = ["version"]
+authors = [
+  { name="Xeladaren", email="xeladaren@pm.me" },
+]
+description = "Tool to log GPS data."
+readme = "README.md"
+
+requires-python = ">=3.9"
+
+dependencies = []
+
+[project.scripts]
+gps-logger = "gps_logger:main"
+
+[tool.setuptools-git-versioning]
+enabled = true
