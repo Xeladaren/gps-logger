@@ -3,6 +3,8 @@
 __pycache__/
 *.egg-info/
 
+*.whl
+
 /build/
 /gps_log/
 
