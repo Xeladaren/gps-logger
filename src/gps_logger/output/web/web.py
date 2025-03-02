@@ -9,7 +9,10 @@ def save(data):
 
     for web_dest in web_dest_list:
         if 'enable' in web_dest and web_dest['enable']:
-            send_dest(web_dest, data)
+            if not 'device-whitelist' in web_dest or data['device'] in web_dest['device-whitelist']:
+                send_dest(web_dest, data)
+            else:
+                print("\tData not send, not in whitelist.")
 
 def send_dest(dest, data):
 
@@ -42,3 +45,4 @@ def send_dest(dest, data):
         request.add_header("Content-Type", "application/x-www-form-urlencoded")
 
     response = urllib.request.urlopen(request)
+    print(f"\tData send: {response.status}")

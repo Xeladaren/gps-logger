@@ -54,7 +54,14 @@
                     "altitude": "ele",
                     "provider": "prov",
                     "activity": "act"
-                }
+                },
+
+                "device-whitelist": [
+                    "user.portable",
+                    "device1",
+                    "device2",
+                    "device3"
+                ]
             },
             {
                 "enable": false,
