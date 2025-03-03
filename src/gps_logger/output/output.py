@@ -15,6 +15,9 @@ def save(path, data):
     if not "device" in data:
         data['device'] = path.removeprefix("/").replace("/", ".")
 
+    if not 'lat' in data or not 'lon' in data:
+        raise ValueError("Data need 'lat' and 'lon' data, for latitude and longitude.")
+
     print("Output data:", flush=True)
     print(f"\tPath = {path}", flush=True)
     print(f"\tData = {data}", flush=True)

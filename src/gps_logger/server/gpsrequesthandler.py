@@ -23,7 +23,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
             self.save_data(api_path, data)
         else:
-            self.send_response(404)
+            self.send_response(http.HTTPStatus.NOT_FOUND)
             self.send_header("Content-type", "text/html")
             self.end_headers()
 
@@ -33,7 +33,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
             if "content-length" in self.headers:
                 content_len = int(self.headers["content-length"])
             else:
-                self.send_response(411)
+                self.send_response(http.HTTPStatus.LENGTH_REQUIRED)
                 self.send_header("Content-type", "none")
                 self.end_headers()
                 return
@@ -46,7 +46,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
             self.save_data(api_path, data)
         else:
-            self.send_response(404)
+            self.send_response(http.HTTPStatus.NOT_FOUND)
             self.send_header("Content-type", "text/html")
             self.end_headers()
 
@@ -54,14 +54,14 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
         try:
             output.save(path, data)
-
+        except ValueError as e:
+            print(f"Save Error: {type(e)}: {e}", flush=True)
+            self.send_response(http.HTTPStatus.BAD_REQUEST)
         except Exception as e:
             print(f"Save Error: {type(e)}: {e}", flush=True)
-            self.send_response(500)
-            self.send_header("Content-type", "none")
-            self.end_headers()
-
+            self.send_response(http.HTTPStatus.INTERNAL_SERVER_ERROR)
         else:
-            self.send_response(200)
-            self.send_header("Content-type", "none")
-            self.end_headers()
+            self.send_response(http.HTTPStatus.OK)
+
+        self.send_header("Content-type", "none")
+        self.end_headers()
