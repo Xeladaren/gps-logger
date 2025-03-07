@@ -2,6 +2,8 @@
 import argparse
 import json
 
+from ..server.auth import api_key
+
 _args = None
 
 def _json_type(file_path):
@@ -20,10 +22,10 @@ def parse():
         parser = argparse.ArgumentParser()
 
         parser.add_argument("--config", "-c", type=_json_type, required=True)
+        parser.add_argument("--api-keys", "-a", type=api_key.api_keys_type, required=True)
         parser.add_argument("--dir-save", "-d", default="./gps_log")
 
         _args = parser.parse_args()
-
 
 def get(arg_name=None, sub_args=[]):
     if _args == None:

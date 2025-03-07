@@ -9,4 +9,5 @@ __pycache__/
 /gps_log/
 
 /config.json
+/api-keys.json
 /test.http

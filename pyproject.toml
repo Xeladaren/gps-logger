@@ -19,10 +19,11 @@ readme = "README.md"
 
 requires-python = ">=3.9"
 
-dependencies = []
+dependencies = ["qrcode"]
 
 [project.scripts]
 gps-logger = "gps_logger:main"
+gps-logger-auth = "gps_logger.gps_logger_auth:main"
 
 [tool.setuptools-git-versioning]
 enabled = true
