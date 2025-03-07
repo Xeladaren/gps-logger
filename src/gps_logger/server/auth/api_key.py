@@ -31,7 +31,7 @@ class ApiKey():
         else:
             self.data = []
 
-    def create_key(self):
+    def create_key(self, name=None):
 
         api_key = ''.join(random.sample(string.ascii_letters+string.digits, 20))
         print(f"New API Key : {api_key}")
@@ -46,7 +46,9 @@ class ApiKey():
         api_key_hash = hashlib.sha512(encoded_api_key).hexdigest()
         # print(api_key_hash)
 
-        data_object = {'api-key-hash': api_key_hash}
+        data_object = {'hash': api_key_hash}
+        if name:
+            data_object['name'] = name
 
         self.data.append(data_object)
         self._save_data()
@@ -61,13 +63,14 @@ class ApiKey():
         self._reload_data()
 
         key_hash = hashlib.sha512(key).hexdigest()
-        # print(f"checked key hash : {key_hash}")
 
         for api_key in self.data:
-            # print(f"\tcheck_to : {api_key['api-key-hash']}")
-            if api_key['api-key-hash'] == key_hash:
-                return True
+            if api_key['hash'] == key_hash:
+                if api_key['name']:
+                    return (True, api_key['name'])
+                else:
+                    return (True, None)
         
-        return False
+        return (False, None)
 
 

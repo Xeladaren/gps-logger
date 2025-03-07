@@ -79,7 +79,12 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
         self.path = self.path.replace(f"{api_key}/", "")
 
-        if api_keys.check_key(api_key):
+        api_check, api_name = api_keys.check_key(api_key)
+        if api_check:
+            if api_name:
+                print(f"Api key {api_name} validate.")
+            else:
+                print(f"Anonimous Api key validate.")
             return None
         else:
             raise PermissionError
