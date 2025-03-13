@@ -5,6 +5,7 @@ import re
 
 from ..output import output
 from ..utils  import args
+from .web     import device_map
 
 class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -32,6 +33,12 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
                 api_path = url_parse.path.removeprefix("/api/")
 
                 self.save_data(api_path, data)
+        elif self.path.startswith("/web/"):
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            page_data = device_map.build_test_page()
+            self.wfile.write(page_data.encode("utf-8"))
         else:
             self.send_response(http.HTTPStatus.NOT_FOUND)
             self.end_headers()

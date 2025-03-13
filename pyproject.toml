@@ -19,7 +19,11 @@ readme = "README.md"
 
 requires-python = ">=3.9"
 
-dependencies = ["qrcode"]
+dependencies = [
+  "qrcode", 
+  "timezonefinder>=6.5.8",
+  "python_magic>=0.4.27"
+]
 
 [project.scripts]
 gps-logger = "gps_logger:main"
