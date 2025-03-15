@@ -5,29 +5,45 @@ from .resources import resources
 from ...utils import osm_frame
 from ...utils import position
 from ...utils import datetime
+from ...output.file import raw
 
 # 12.97261 77.58064 Bengaluru
 # 47.054500 -0.879083 Cholet
 
 def build_test_page():
-    data = {
-        'device': 'voiture', 
-        'timestamp': 1741886502.658, 
-        'lat': 47.055054, 
-        'lon': -0.8797846, 
-        'ele': 76.1137, 
-        'spd': 5.17, 
-        'acc': 3.7900925, 'dir': 217.1, 
-        'eta': 1741886519658.0, 
-        'etfa': 1741886519658.0, 
-        'eda': 94.0, 
-        'edfa': 94.0
-    }
+    # data = {'device': 'voiture', 'timestamp': 1741886502.658, 'lat': 47.055054, 'lon': -0.8797846, 'ele': 76.1137, 'spd': 5.17, 'acc': 3.7900925, 'dir': 217.1, 'eta': 1741886519.658, 'etfa': 1741886519.658, 'eda': 94.0, 'edfa': 94.0}
+    # data = {'device': 'voiture', 'timestamp': 1741884253.648, 'lat': 47.067375, 'lon': -0.8536533, 'ele': 128.80542, 'spd': 4.97, 'acc': 3.7900925, 'dir': 188.9, 'eta': 1741885166.648, 'etfa': 1741884599.648, 'eda': 7449.0, 'edfa': 3900.0}
+    # data = {'device': 'voiture', 'timestamp': 1741886520.615, 'lat': 47.054596, 'lon': -0.8797171, 'ele': 78.96166, 'spd': 0.73, 'acc': 3.7900925, 'dir': 157.4, 'eta': 0.0, 'etfa': 0.0, 'eda': 0.0, 'edfa': 0.0}
+    # data = {'device': 'alexandre.portable', 'timestamp': 1741977485.0, 'lat': 47.05427905, 'lon': -0.87936821, 'ele': 148.4644775390625, 'spd': 0.0, 'acc': 14.892243385314941, 'sat': 45.0, 'batt': 63.0, 'ischarging': True, 'dir': 0.0}
 
+    data = raw.get("/alexandre/all")
+    print(data)
 
-    return build_map_page(data)
+    if not data:
+        return ""
+    
+    return build_map_page(data, auto_reload=None)
 
-def build_map_page(data):
+def get_page(path, query=None):
+    data = raw.get(path)
+
+    if not data:
+        return None
+
+    if 'reload' in query:
+        auto_reload = int(query['reload'][0])
+    else:
+        auto_reload = None
+
+    if 'zoom' in query:
+        zoom = int(query['zoom'][0])
+    else:
+        zoom = None
+    
+    return build_map_page(data, auto_reload=auto_reload, zoom=zoom)
+    
+
+def build_map_page(data, auto_reload=None, zoom=None):
     
     res_page = resources.Resource("html/device_map_page.html")
     res_style = resources.Resource("css/device_map_style.css")
@@ -37,14 +53,29 @@ def build_map_page(data):
 
     template_dict['page_title'] = f"GPS Logger"
     template_dict['page_icon_href'] = res_page_icon.get_html_href()
+    template_dict['page_head'] = ""
 
-    template_dict['page_head'] = f"""
+    if auto_reload:
+        template_dict['page_head'] += f'<meta http-equiv="refresh" content="{int(auto_reload)}">\n'
+
+    template_dict['page_head'] += f"""
     <style>
     {res_style.get_string()}
     </style>
     """
 
-    template_dict['osm_frame_src'] = osm_frame.get_link(data['lat'], data['lon'])
+    if not zoom:
+        if 'eda' in data:
+            zoom = int(data['eda'])
+            if zoom < 1000:
+                zoom = 1000
+            if zoom > 4_000_000:
+                zoom = 4_000_000
+        else:
+            zoom = 10_000
+
+    print("Zoom level =", zoom)
+    template_dict['osm_frame_src'] = osm_frame.get_link(data['lat'], data['lon'], zoom=zoom)
     template_dict['widget_zone'] = build_widget_zone(data)
 
     return res_page.get_template().safe_substitute(template_dict)
@@ -56,6 +87,8 @@ def build_widget_zone(data):
     out_str += build_widget_position(data)
     out_str += build_widget_aux_nav(data)
     out_str += build_widget_datetime(data)
+    out_str += build_targets(data)
+    out_str += build_technics(data)
 
     out_str += '</div>\n'
 
@@ -141,4 +174,83 @@ def build_widget_datetime(data):
 
     out_str += '</div>\n'
 
+    return out_str
+
+def build_targets(data):
+
+    if not 'eda' in data or data['eda'] == 0.0:
+        return ""
+
+    if not 'edfa' in data or data['edfa'] == 0.0:
+        return ""
+
+    out_str = ""
+
+    if data['eda'] != data['edfa']:
+        out_str += build_target(data, "intermediate")
+
+    out_str += build_target(data, "final")
+
+    return out_str
+
+
+def build_target(data, type):
+
+    out_str = '<div class="widget">\n'
+
+    if type == "intermediate":
+        icon = "img/widget_intermediate_day.svg"
+        text = position.dist_human(data['edfa'])
+        out_str += build_widget_elem(icon, text)
+
+        icon = "img/widget_intermediate_time_day.svg"
+        text = datetime.get_adaptatif_str(data['etfa'], data['lat'], data['lon'])
+        out_str += build_widget_elem(icon, text)
+
+        icon = "img/widget_intermediate_time_to_go_day.svg"
+        text = datetime.get_delta_str(data['etfa'])
+        out_str += build_widget_elem(icon, text)
+
+    elif type == "final":
+        icon = "img/widget_target_day.svg"
+        text = position.dist_human(data['eda'])
+        out_str += build_widget_elem(icon, text)
+
+        icon = "img/widget_time_to_distance_day.svg"
+        text = datetime.get_adaptatif_str(data['eta'], data['lat'], data['lon'])
+        out_str += build_widget_elem(icon, text)
+
+        icon = "img/widget_destination_time_to_go_day.svg"
+        text = datetime.get_delta_str(data['eta'])
+        out_str += build_widget_elem(icon, text)
+
+    out_str += '</div>\n'
+    return out_str
+
+def build_technics(data):
+
+    if not 'sat' in data and not 'acc' in data and not 'batt' in data:
+        return ""
+
+    out_str = '<div class="widget">\n'
+
+    if 'sat' in data:
+        icon = "img/widget_gps_info_day.svg"
+        text = f"{int(data['sat'])} sat"
+        out_str += build_widget_elem(icon, text)
+
+    if 'acc' in data:
+        icon = "img/widget_ruler_circle_day.svg"
+        text = f"{int(data['acc'])} m"
+        out_str += build_widget_elem(icon, text)
+
+    if 'batt' in data:
+        if 'ischarging' in data and data['ischarging']:
+            icon = "img/widget_battery_charging_day.svg"
+        else:
+            icon = "img/widget_battery_day.svg"
+        text = f"{int(data['batt'])} %"
+        out_str += build_widget_elem(icon, text)
+
+    out_str += '</div>\n'
     return out_str

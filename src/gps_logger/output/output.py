@@ -45,7 +45,7 @@ def _compute_data(data):
         if type(value) == list:
             value = "".join(value)
 
-        if type(value) == str and "timestamp" in key:
+        if type(value) == str and (("timestamp" in key) or ("eta" in key) or ("etfa" in key)):
             if len(value) > 10:
                 value = value[:10] + "." + value[10:]
 

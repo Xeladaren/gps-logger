@@ -6,6 +6,7 @@ import re
 from ..output import output
 from ..utils  import args
 from .web     import device_map
+from .web     import web
 
 class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -34,11 +35,17 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
                 self.save_data(api_path, data)
         elif self.path.startswith("/web/"):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            page_data = device_map.build_test_page()
-            self.wfile.write(page_data.encode("utf-8"))
+            try:
+                self.check_api_auth()
+            except PermissionError:
+                self.send_response(http.HTTPStatus.UNAUTHORIZED)
+                self.end_headers()
+            else:
+                url_parse = urllib.parse.urlparse(self.path)
+                query = urllib.parse.parse_qs(url_parse.query)
+                api_path = url_parse.path.removeprefix("/web/")
+
+                self.get_web_page(api_path, query)
         else:
             self.send_response(http.HTTPStatus.NOT_FOUND)
             self.end_headers()
@@ -78,7 +85,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
         if "Api-Key" in self.headers:
             api_key = self.headers["Api-Key"]
         else:
-            key_match = re.search(r"^/api/([0-9a-zA-Z]+)/", self.path)
+            key_match = re.search(r"^/\w+/([0-9a-zA-Z]+)/", self.path)
             if key_match:
                 api_key = key_match[1]
             else:
@@ -96,6 +103,20 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             raise PermissionError
 
+    def get_web_page(self, path, query):
+
+        page_data = web.get_web_page(path, query=query)
+
+        if page_data:
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+            self.wfile.write(page_data.encode("utf-8"))
+        else:
+            self.send_response(http.HTTPStatus.NOT_FOUND)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b'')
 
     def save_data(self, path, data):
 
