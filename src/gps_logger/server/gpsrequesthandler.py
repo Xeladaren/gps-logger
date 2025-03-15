@@ -13,21 +13,16 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
 
         if self.path == "/":
+            self.send_response_page(http.HTTPStatus.OK)
 
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("<html><head><title>GPS Logger</title></head>", "utf-8"))
-            self.wfile.write(bytes("<h1>GPS Logger</h1>", "utf-8"))
-            self.wfile.write(bytes("<h2>Server OK</h2>", "utf-8"))
-            self.wfile.write(bytes("</body></html>", "utf-8"))
+        elif self.path == "/coffee":
+            self.send_response_page(http.HTTPStatus.IM_A_TEAPOT)
 
         elif self.path.startswith("/api/"):
             try:
                 self.check_api_auth()
             except PermissionError:
-                self.send_response(http.HTTPStatus.UNAUTHORIZED)
-                self.end_headers()
+                self.send_response_page(http.HTTPStatus.UNAUTHORIZED)
             else:
                 url_parse = urllib.parse.urlparse(self.path)
                 data = urllib.parse.parse_qs(url_parse.query)
@@ -38,8 +33,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
             try:
                 self.check_api_auth()
             except PermissionError:
-                self.send_response(http.HTTPStatus.UNAUTHORIZED)
-                self.end_headers()
+                self.send_response_page(http.HTTPStatus.UNAUTHORIZED)
             else:
                 url_parse = urllib.parse.urlparse(self.path)
                 query = urllib.parse.parse_qs(url_parse.query)
@@ -47,8 +41,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
                 self.get_web_page(api_path, query)
         else:
-            self.send_response(http.HTTPStatus.NOT_FOUND)
-            self.end_headers()
+            self.send_response_page(http.HTTPStatus.NOT_FOUND)
 
     def do_POST(self):
         
@@ -56,16 +49,14 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
             if "content-length" in self.headers:
                 content_len = int(self.headers["content-length"])
             else:
-                self.send_response(http.HTTPStatus.LENGTH_REQUIRED)
-                self.send_header("Content-type", "none")
-                self.end_headers()
+                self.send_response_page(http.HTTPStatus.LENGTH_REQUIRED)
                 return
 
             try:
                 self.check_api_auth()
             except PermissionError:
-                self.send_response(http.HTTPStatus.UNAUTHORIZED)
-                self.end_headers()
+                self.send_response_page(http.HTTPStatus.UNAUTHORIZED)
+
             else:
                 url_parse = urllib.parse.urlparse(self.path)
 
@@ -75,8 +66,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
                 self.save_data(api_path, data)
         else:
-            self.send_response(http.HTTPStatus.NOT_FOUND)
-            self.end_headers()
+            self.send_response_page(http.HTTPStatus.NOT_FOUND)
 
     def check_api_auth(self):
 
@@ -108,15 +98,12 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
         page_data = web.get_web_page(path, query=query)
 
         if page_data:
-            self.send_response(200)
+            self.send_response(http.HTTPStatus.OK)
             self.send_header("Content-type", "text/html")
             self.end_headers()
             self.wfile.write(page_data.encode("utf-8"))
         else:
-            self.send_response(http.HTTPStatus.NOT_FOUND)
-            self.send_header("Content-type", "text/plain")
-            self.end_headers()
-            self.wfile.write(b'')
+            self.send_response_page(http.HTTPStatus.NOT_FOUND)
 
     def save_data(self, path, data):
 
@@ -124,17 +111,26 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
             output.save(path, data)
         except ValueError as e:
             print(f"Save Error: {type(e)}: {e}", flush=True)
-            self.send_response(http.HTTPStatus.BAD_REQUEST)
+            self.send_response_page(http.HTTPStatus.BAD_REQUEST)
         except Exception as e:
             print(f"Save Error: {type(e)}: {e}", flush=True)
-            self.send_response(http.HTTPStatus.INTERNAL_SERVER_ERROR)
+            self.send_response_page(http.HTTPStatus.INTERNAL_SERVER_ERROR)
         else:
-            self.send_response(http.HTTPStatus.OK)
+            self.send_response_page(http.HTTPStatus.CREATED)
 
-        self.send_header("Content-type", "none")
+    def send_response_page(self, code, message=None):
+
+        self.send_response(code)
+        self.send_header("Content-type", "text/html")
         self.end_headers()
-    
+        self.wfile.write(bytes(f"<html><head><title>GPS Logger - {code} {code.phrase}</title></head>", "utf-8"))
+        self.wfile.write(bytes(f"<h1>{code}: {code.phrase}</h1>", "utf-8"))
+        self.wfile.write(bytes(f"<h2>{code.description}</h2>", "utf-8"))
+        if message:
+            self.wfile.write(bytes(f"<p>{message}</p>", "utf-8"))
+        self.wfile.write(bytes("</body></html>", "utf-8"))
+
     def send_response(self, code, message=None):
 
-        print(f"{self.command} {self.path} {code} {message}")
+        print(f"{self.command} {self.path} {code} {message}", flush=True)
         self.send_response_only(code, message)
