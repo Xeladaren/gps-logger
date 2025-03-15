@@ -118,12 +118,16 @@ def build_widget_position(data):
     lat_str = position.pos_to_str_dms(data['lat'], "NS")
     lon_str = position.pos_to_str_dms(data['lon'], "EW")
 
-    out_str = '<div class="widget">\n'
+    geo_link = f"geo:{data['lat']:06},{data['lon']:06}"
+
+    out_str  = f'<a href="{geo_link}">\n'
+    out_str += '<div class="widget">\n'
 
     out_str += build_widget_elem(lat_icon_name, f"{lat_str}")
     out_str += build_widget_elem(lon_icon_name, f"{lon_str}")
 
     out_str += '</div>\n'
+    out_str += '</a>\n'
 
     return out_str
 
