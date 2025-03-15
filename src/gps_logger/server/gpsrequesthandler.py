@@ -128,6 +128,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(bytes(f"<h2>{code.description}</h2>", "utf-8"))
         if message:
             self.wfile.write(bytes(f"<p>{message}</p>", "utf-8"))
+        self.wfile.write(bytes(f'<img src="https://http.cat/{code}.jpg"/>', "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
     def send_response(self, code, message=None):
