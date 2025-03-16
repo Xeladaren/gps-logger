@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>${page_title}</title>
+        <link rel="icon" href="${page_icon_href}">
+        ${page_head}
+    </head>
+
+    <body>
+
+        ${apikey_result_section}
+
+        <h1>API Keygen</h1>
+        <form action="" method="get">
+            <input id="create" name="create" type="hidden" value="true" />
+
+            <label for="name">Key name</label><br />
+            <input type="text" id="name" name="name" placeholder="Key name" required/><br />
+            <br />
+            <label for="name">Key path</label><br />
+            <input type="text" id="path" name="path" placeholder="Key path" pattern="[\/\w\-\.]+" required/><br />
+            <br />
+            <label for="expire">Is expire</label>
+            <input type="checkbox" id="expire" name="expire"><br />
+            <br />
+            <label for="expire">Expire Date</label><br />
+            <input type="datetime-local" id="expire-date" name="expire-date" disabled/><br />
+            <input id="timezone" name="timezone" type="hidden" value="none" />
+            <br />
+
+            <input type="submit" value="Create">
+            
+            ${apikey_create_script}
+
+        </form>
+
+    </body>
+
+</html>

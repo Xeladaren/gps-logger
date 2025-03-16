@@ -83,7 +83,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
         self.path = self.path.replace(f"{api_key}/", "")
 
-        api_check, api_name = api_keys.check_key(api_key)
+        api_check, api_name = api_keys.check_key(api_key, self.path)
         if api_check:
             if api_name:
                 print(f"Api key {api_name} validate.")
@@ -95,15 +95,19 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def get_web_page(self, path, query):
 
-        page_data = web.get_web_page(path, query=query)
-
-        if page_data:
-            self.send_response(http.HTTPStatus.OK)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(page_data.encode("utf-8"))
+        try:
+            page_data = web.get_web_page(path, query=query)
+        except Exception as e:
+            print(e)
+            self.send_response_page(http.HTTPStatus.INTERNAL_SERVER_ERROR)
         else:
-            self.send_response_page(http.HTTPStatus.NOT_FOUND)
+            if page_data:
+                self.send_response(http.HTTPStatus.OK)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                self.wfile.write(page_data.encode("utf-8"))
+            else:
+                self.send_response_page(http.HTTPStatus.NOT_FOUND)
 
     def save_data(self, path, data):
 
