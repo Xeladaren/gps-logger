@@ -33,7 +33,7 @@ class ApiKey():
         else:
             self.data = []
 
-    def create_key(self, name=None, path:(None|pathlib.PosixPath|str)=None, expire_date:(None|float)=None):
+    def create_key(self, name=None, path=None, expire_date=None):
 
         api_key = ''.join(random.sample(string.ascii_letters+string.digits, 20))
 
@@ -56,7 +56,7 @@ class ApiKey():
 
         return api_key
 
-    def check_key(self, key:(str|bytes), path:(None|str)=None):
+    def check_key(self, key, path=None):
 
         if type(key) == str:
             key = key.encode("ascii")
