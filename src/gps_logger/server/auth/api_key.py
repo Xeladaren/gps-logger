@@ -4,7 +4,9 @@ import hashlib
 import random
 import string
 import os.path
-import qrcode
+import time
+import datetime
+import pathlib
 
 def api_keys_type(path):
     return ApiKey(path)
@@ -31,16 +33,9 @@ class ApiKey():
         else:
             self.data = []
 
-    def create_key(self, name=None):
+    def create_key(self, name=None, path:(None|pathlib.PosixPath|str)=None, expire_date:(None|float)=None):
 
         api_key = ''.join(random.sample(string.ascii_letters+string.digits, 20))
-        print(f"New API Key : {api_key}")
-
-        qr = qrcode.QRCode()
-        qr.add_data(api_key)
-        qr.print_ascii()
-        
-        print(f"(you can't get again this api key)")
 
         encoded_api_key = api_key.encode("ascii")
         api_key_hash = hashlib.sha512(encoded_api_key).hexdigest()
@@ -50,10 +45,18 @@ class ApiKey():
         if name:
             data_object['name'] = name
 
+        if path:
+            data_object['path'] = str(path)
+
+        if expire_date:
+            data_object['expire-date'] = expire_date
+
         self.data.append(data_object)
         self._save_data()
 
-    def check_key(self, key):
+        return api_key
+
+    def check_key(self, key:(str|bytes), path:(None|str)=None):
 
         if type(key) == str:
             key = key.encode("ascii")
@@ -66,6 +69,18 @@ class ApiKey():
 
         for api_key in self.data:
             if api_key['hash'] == key_hash:
+
+                if path and 'path' in api_key:
+                    if not path.startswith(api_key['path']):
+                        return (False, None)
+
+                if 'expire-date' in api_key:
+                    timestamp_expire = api_key['expire-date']
+                    timestamp_now = time.time()
+
+                    if timestamp_expire < timestamp_now:
+                        return (False, None)
+
                 if api_key['name']:
                     return (True, api_key['name'])
                 else:
