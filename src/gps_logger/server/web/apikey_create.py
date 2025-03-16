@@ -96,4 +96,4 @@ def make_qrcode_image(data):
 
     img_b64 = base64.b64encode(img_bytes)
 
-    return f'data:image/png;base64,{img_b64.decode('utf-8')}'
+    return f'data:image/png;base64,{img_b64.decode("utf-8")}'
