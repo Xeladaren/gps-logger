@@ -38,3 +38,16 @@ class Resource():
         b64 = self.get_b64()
 
         return f"data:{self.mime};base64,{b64.decode(encoding)}"
+
+
+def get_html_block(balise, file_list, encoding="utf-8"):
+
+    out_str = f"<{balise}>\n"
+
+    for file_path in file_list:
+        resource = Resource(file_path)
+        out_str += resource.get_string(encoding=encoding)
+
+    out_str += f"</{balise}>\n"
+
+    return out_str

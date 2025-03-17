@@ -29,7 +29,10 @@ def delta_format(delta_sec, hour="h", min="min", sec="s", day="day"):
 
     day = second
 
-
+def timestamp_to_iso(timestamp, timespec='seconds'):
+    tz = datetime.timezone.utc
+    date = datetime.datetime.fromtimestamp(timestamp, tz=tz)
+    return date.isoformat(timespec='seconds')
 
 def get_delta_str(timestamp):
 
