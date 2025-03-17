@@ -67,7 +67,7 @@ def build_map_page(data, auto_reload=None, zoom=None):
     ])
 
     if not zoom:
-        if 'eda' in data:
+        if 'eda' in data and data['eda'] > 0:
             zoom = int(data['eda'])
             if zoom < 1000:
                 zoom = 1000
