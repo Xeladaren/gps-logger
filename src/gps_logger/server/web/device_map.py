@@ -76,7 +76,6 @@ def build_map_page(data, auto_reload=None, zoom=None):
         else:
             zoom = 10_000
 
-    print("Zoom level =", zoom)
     template_dict['osm_frame_src'] = osm_frame.get_link(data['lat'], data['lon'], zoom=zoom)
     template_dict['widget_zone'] = build_widget_zone(data)
 

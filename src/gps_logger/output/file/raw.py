@@ -25,30 +25,44 @@ def get(path):
 
     path_dir    = os.path.dirname(path)
     path_device = os.path.basename(path) 
+    merge_delay = args.get("config", ['server', 'web', 'device-map', 'merge-delay'])
 
     last_file = file.get_last_file(path_dir)
 
-    timestamp = 0
+    timestamp = None
     data_out = {}
 
     if last_file:
 
         raw_file  = open(last_file, "r")
-        for line in raw_file.readlines():
+        lines = raw_file.readlines()
+        lines.reverse()
+        for line in lines:
 
             data = eval(line)
 
-            if path_device == "all" or 'device' in data and data['device'] == path_device:
-                for elem in data:
+            if 'timestamp' in data:
+                if timestamp != None:
+                    time_diff = timestamp - data['timestamp']
 
-                    if not elem in data_out:
+                    if merge_delay and time_diff > merge_delay:
+                        break
+                    elif time_diff < 0:
+                        for elem in data:
+                            data_out[elem] = data[elem]
+                        timestamp = data['timestamp']
+                else:
+                    for elem in data:
                         data_out[elem] = data[elem]
-                    elif 'timestamp' in data and data['timestamp'] > timestamp:
-                        data_out[elem] = data[elem]
-
-                if 'timestamp' in data:
                     timestamp = data['timestamp']
 
+            if path_device == "all" or 'device' in data and data['device'] == path_device:
+                for elem in data:
+                    if not elem in data_out:
+                        data_out[elem] = data[elem]
+            else:
+                break
+        
         raw_file.close()
 
         if data_out != {}:
