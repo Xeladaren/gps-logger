@@ -10,9 +10,12 @@ class Resource():
     def __init__(self, path):
 
         parent_dir = Path(__file__).parent
-        self.path = os.path.join(parent_dir, path)
-        self.mime = magic.from_file(self.path, mime=True)
+        self.path = os.path.join(parent_dir, "res", path)
 
+        if not os.path.exists(self.path):
+            raise FileNotFoundError
+
+        self.mime = magic.from_file(self.path, mime=True)
 
     def get_bytes(self):
 
