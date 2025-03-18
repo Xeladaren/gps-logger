@@ -17,11 +17,9 @@ def get_page(query):
     template_dict = dict()
 
     template_dict['page_title'] = f"GPS Logger"
-    template_dict['page_icon_href'] = page_icon_resource.get_html_href()
     template_dict['page_head'] = ""
 
     template_dict['apikey_result_section'] = build_result(query)
-    template_dict['apikey_create_script']  = build_script()
 
     return page_resource.get_template().safe_substitute(template_dict)
 
@@ -74,15 +72,6 @@ def build_result(query):
         return out_str
     else:
         return ""
-
-def build_script():
-    script_resource = resources.Resource("js/apikey_create.js")
-
-    out_str  = "<script>\n"
-    out_str += script_resource.get_string()
-    out_str += "</script>\n"
-
-    return out_str
 
 def make_qrcode_image(data):
 

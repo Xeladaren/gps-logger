@@ -9,13 +9,32 @@ class Resource():
 
     def __init__(self, path):
 
-        parent_dir = Path(__file__).parent
-        self.path = os.path.join(parent_dir, "res", path)
+        path = path.replace("..", "")
 
-        if not os.path.exists(self.path):
+        parent_dir = Path(__file__).parent
+        res_dir = os.path.join(parent_dir, "res")
+        res_path = os.path.join(res_dir, path)
+
+        abs_path = os.path.normpath(os.path.realpath(res_path))
+        abs_dir  = os.path.normpath(os.path.realpath(res_dir))+"/"
+        
+        if not (abs_dir in abs_path):
+            raise PermissionError
+
+        if not os.path.exists(res_path):
             raise FileNotFoundError
 
+        self.path = res_path
         self.mime = magic.from_file(self.path, mime=True)
+
+        if self.mime == "text/plain":
+            if self.path.endswith(".css"):
+                self.mime = "text/css"
+            elif self.path.endswith(".js"):
+                self.mime = "text/javascript"
+
+    def get_mime(self):
+        return self.mime
 
     def get_bytes(self):
 

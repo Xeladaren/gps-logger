@@ -1,28 +1,12 @@
 
 from string import Template
+import os.path
 
 from .resources import resources
 from ...utils import osm_frame
 from ...utils import position
 from ...utils import dateutils
 from ...output.file import raw
-
-# 12.97261 77.58064 Bengaluru
-# 47.054500 -0.879083 Cholet
-
-def build_test_page():
-    # data = {'device': 'voiture', 'timestamp': 1741886502.658, 'lat': 47.055054, 'lon': -0.8797846, 'ele': 76.1137, 'spd': 5.17, 'acc': 3.7900925, 'dir': 217.1, 'eta': 1741886519.658, 'etfa': 1741886519.658, 'eda': 94.0, 'edfa': 94.0}
-    # data = {'device': 'voiture', 'timestamp': 1741884253.648, 'lat': 47.067375, 'lon': -0.8536533, 'ele': 128.80542, 'spd': 4.97, 'acc': 3.7900925, 'dir': 188.9, 'eta': 1741885166.648, 'etfa': 1741884599.648, 'eda': 7449.0, 'edfa': 3900.0}
-    # data = {'device': 'voiture', 'timestamp': 1741886520.615, 'lat': 47.054596, 'lon': -0.8797171, 'ele': 78.96166, 'spd': 0.73, 'acc': 3.7900925, 'dir': 157.4, 'eta': 0.0, 'etfa': 0.0, 'eda': 0.0, 'edfa': 0.0}
-    # data = {'device': 'alexandre.portable', 'timestamp': 1741977485.0, 'lat': 47.05427905, 'lon': -0.87936821, 'ele': 148.4644775390625, 'spd': 0.0, 'acc': 14.892243385314941, 'sat': 45.0, 'batt': 63.0, 'ischarging': True, 'dir': 0.0}
-
-    data = raw.get("/alexandre/all")
-    print(data)
-
-    if not data:
-        return ""
-    
-    return build_map_page(data, auto_reload=None)
 
 def get_page(path, query=None):
     data = raw.get(path)
@@ -46,25 +30,14 @@ def get_page(path, query=None):
 def build_map_page(data, auto_reload=None, zoom=None):
     
     res_page = resources.Resource("html/device_map_page.html")
-    res_style = resources.Resource("css/device_map_style.css")
-    res_page_icon = resources.Resource("img/widget_coordinates_location_day.svg")
 
     template_dict = dict()
 
     template_dict['page_title'] = f"GPS Logger"
-    template_dict['page_icon_href'] = res_page_icon.get_html_href()
     template_dict['page_head'] = ""
 
     if auto_reload:
         template_dict['page_head'] += f'<meta http-equiv="refresh" content="{int(auto_reload)}">\n'
-
-    template_dict['page_head'] += resources.get_html_block("style", [
-        "css/device_map_style.css"
-    ])
-    template_dict['page_head'] += resources.get_html_block("script", [
-        "js/func_get_human_time.js",
-        "js/func_update_date_delta.js"
-    ])
 
     if not zoom:
         if 'eda' in data and data['eda'] > 0:
@@ -97,8 +70,6 @@ def build_widget_zone(data):
 
 def build_widget_elem(icon_name, text, text_attrs={}, img_attrs={}):
 
-    img_data = resources.Resource(icon_name).get_html_href()
-
     text_attrs = text_attrs.copy()
     img_attrs  = img_attrs.copy()
 
@@ -112,7 +83,7 @@ def build_widget_elem(icon_name, text, text_attrs={}, img_attrs={}):
     else:
         img_attrs['class'] = ["widget-icon"]
     
-    img_attrs['src'] = [img_data]
+    img_attrs['src'] = [os.path.join("/res", icon_name)]
 
     text_attrs_list = []
     for attr in text_attrs:

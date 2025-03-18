@@ -7,6 +7,7 @@ from ..output import output
 from ..utils  import args
 from .web     import device_map
 from .web     import web
+from .web.resources import resources
 
 class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -17,6 +18,23 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
         elif self.path == "/coffee":
             self.send_response_page(http.HTTPStatus.IM_A_TEAPOT)
+
+        elif self.path.startswith("/res/"):
+            res = None
+            try:
+                url_parse = urllib.parse.urlparse(self.path)
+                res_path = url_parse.path.removeprefix("/res/")
+                res = resources.Resource(res_path)
+            except Exception as e:
+                print(type(e), e)
+                self.send_response_page(http.HTTPStatus.NOT_FOUND)
+            else:
+                print(res.get_mime())
+                self.send_response(http.HTTPStatus.OK)
+                self.send_header("Content-type", res.get_mime())
+                self.send_header("Cache-Control", "max-age=3600")
+                self.end_headers()
+                self.wfile.write(res.get_bytes()) # src/gps_logger/server/web/resources/res/img/widget_battery_day.svg
 
         elif self.path.startswith("/api/"):
             try:
@@ -127,7 +145,10 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(bytes(f"<html><head><title>GPS Logger - {code} {code.phrase}</title></head>", "utf-8"))
+        self.wfile.write(bytes("<html><head>", "utf-8"))
+        self.wfile.write(bytes(f"<title>GPS Logger - {code} {code.phrase}</title>", "utf-8"))
+        self.wfile.write(bytes("<link rel=\"icon\" href=\"/res/img/icon.svg\">", "utf-8"))
+        self.wfile.write(bytes("</head>", "utf-8"))
         self.wfile.write(bytes(f"<h1>{code}: {code.phrase}</h1>", "utf-8"))
         self.wfile.write(bytes(f"<h2>{code.description}</h2>", "utf-8"))
         if message:
