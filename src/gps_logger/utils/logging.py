@@ -6,8 +6,8 @@ from . import args
 def log_type(str):
     if str.isnumeric():
         return int(str)
-    elif str in logging.getLevelNamesMapping():
-        return logging.getLevelNamesMapping()[str]
+    elif str in logging._nameToLevel:
+        return logging._nameToLevel[str]
     else:
         raise ValueError
 

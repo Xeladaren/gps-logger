@@ -177,7 +177,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def send_response(self, code, message=None):
 
-        if code.is_success:
+        if 200 <= code < 300:
             logger.info(f"{self.client_address[0]} {self.command} {self.path} : Response {code}")
         else:
             logger.warning(f"{self.client_address[0]} {self.command} {self.path} : Response {code}")
