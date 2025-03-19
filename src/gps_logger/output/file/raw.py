@@ -3,6 +3,9 @@ import os.path
 
 from ...utils import file
 from ...utils import args
+from ...utils import logging
+
+logger = logging.getLogger(__name__)
 
 def save(path, data):
 
@@ -13,8 +16,8 @@ def save(path, data):
 
         data = _make_saved_data(data)
 
-        print(f"\tSave path raw = {save_path}", flush=True)
-        print(f"\tSave data raw = {data}", flush=True)
+        logger.info(f"Save raw file: {save_path}")
+        logger.debug(f"Save raw data: {data}")
 
         os.makedirs(save_dir, exist_ok=True)
 

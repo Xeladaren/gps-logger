@@ -2,7 +2,10 @@
 import http.server
 
 from ..utils import args
+from ..utils import logging
 from .gpsrequesthandler import GPSRequestHandler
+
+logger = logging.getLogger(__name__)
 
 def start():
 
@@ -12,9 +15,9 @@ def start():
     addr = config['server']['listen']
 
     with http.server.HTTPServer((addr, port), GPSRequestHandler) as httpd:
-        print(f"Server start to ({addr}:{port})", flush=True)
+        logger.info(f"Server start to ({addr}:{port})")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("stop server", flush=True)
+            logger.info("stop server")
             pass

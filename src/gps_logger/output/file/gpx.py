@@ -5,6 +5,9 @@ import datetime
 
 from ...utils import file
 from ...utils import args
+from ...utils import logging
+
+logger = logging.getLogger(__name__)
 
 valid_gpx_wpt_child = [
     "ele", 
@@ -35,11 +38,11 @@ def save(path, data):
 
         if os.path.exists(save_path):
             update_gpx(save_path, data)
-            print(f"\tUpdate path gpx = {save_path}", flush=True)
+            logger.info(f"Update GPX File: {save_path}")
         else:
             os.makedirs(save_dir, exist_ok=True)
             create_new_gpx(save_path, data)
-            print(f"\tCreate path gpx = {save_path}", flush=True)
+            logger.info(f"Create GPX File: {save_path}")
 
 def save_xml_file(file_path, xml_root):
 

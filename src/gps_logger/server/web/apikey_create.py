@@ -26,7 +26,7 @@ def get_page(query):
 def build_result(query):
 
     if 'create' in query and query['create'][0] == "true":
-        print(query)
+
         api_keys = args.get('api_keys')
         out_str  = "<h1>New key</h1>\n"
 

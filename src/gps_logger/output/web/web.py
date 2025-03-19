@@ -3,6 +3,9 @@ import urllib.parse
 import urllib.request
 
 from ...utils import args
+from ...utils import logging
+
+logger = logging.getLogger(__name__)
 
 def save(data):
     web_dest_list = args.get('config', ['output', 'web'])
@@ -12,7 +15,7 @@ def save(data):
             if not 'device-whitelist' in web_dest or data['device'] in web_dest['device-whitelist']:
                 send_dest(web_dest, data)
             else:
-                print("\tData not send, not in whitelist.")
+                logger.debug(f"Data not send, '{data['device']}' not in whitelist.")
 
 def send_dest(dest, data):
 
@@ -45,4 +48,4 @@ def send_dest(dest, data):
         request.add_header("Content-Type", "application/x-www-form-urlencoded")
 
     response = urllib.request.urlopen(request)
-    print(f"\tData send: {response.status}")
+    logger.info(f"Data send: {response.status}")

@@ -3,10 +3,13 @@ import re
 import datetime
 
 from ..utils import args
+from ..utils import logging
 
 from .file import raw
 from .file import gpx
 from .web  import web
+
+logger = logging.getLogger(__name__)
 
 def save(path, data):
 
@@ -18,9 +21,10 @@ def save(path, data):
     if not 'lat' in data or not 'lon' in data:
         raise ValueError("Data need 'lat' and 'lon' data, for latitude and longitude.")
 
-    print("Output data:", flush=True)
-    print(f"\tPath = {path}", flush=True)
-    print(f"\tData = {data}", flush=True)
+    logger.info(f"Save position ({data['lat']}, {data['lon']})")
+    logger.debug(f"\tSave Path: {path}")
+    for elem in data:
+        logger.debug(f"\t{elem}: {data[elem]}")
 
     raw.save(path, data)
     gpx.save(path, data)

@@ -39,7 +39,6 @@ class ApiKey():
 
         encoded_api_key = api_key.encode("ascii")
         api_key_hash = hashlib.sha512(encoded_api_key).hexdigest()
-        # print(api_key_hash)
 
         data_object = {'hash': api_key_hash}
         if name:
