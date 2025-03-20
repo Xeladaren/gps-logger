@@ -3,7 +3,6 @@ from string import Template
 import os.path
 
 from .resources import resources
-from ...utils import osm_frame
 from ...utils import position
 from ...utils import dateutils
 from ...output.file import raw
@@ -41,15 +40,11 @@ def build_map_page(data, auto_reload=None, zoom=None):
 
     if not zoom:
         if 'eda' in data and data['eda'] > 0:
-            zoom = int(data['eda'])
-            if zoom < 1000:
-                zoom = 1000
-            if zoom > 4_000_000:
-                zoom = 4_000_000
+            position.dist_to_zoom(data['eda'])
         else:
-            zoom = 10_000
+            zoom = 14
 
-    template_dict['osm_frame_src'] = osm_frame.get_link(data['lat'], data['lon'], zoom=zoom)
+    template_dict['map_init_script'] = f"<script>build_map(L.latLng({data['lat']}, {data['lon']}), {zoom}, 0);</script>"
     template_dict['widget_zone'] = build_widget_zone(data)
 
     return res_page.get_template().safe_substitute(template_dict)

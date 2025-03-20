@@ -1,4 +1,12 @@
 
+def dist_to_zoom(dist):
+
+    for i in range(0, 12):
+        if dist < 1024 * 2**i:
+            return 17 - i
+
+    return 5
+
 def pos_to_str_dms(pos, axe):
 
     dir  = axe[0] if pos >= 0  else axe[1]

@@ -5,6 +5,9 @@
     <title>${page_title}</title>
     <link rel="icon" href="/res/img/icon.svg">
     <link rel="stylesheet" href="/res/css/device_map_style.css">
+    <link rel="stylesheet" href="/res/leaflet/leaflet.css" />
+    <script src="/res/leaflet/leaflet.js"></script>
+    <script src="/res/js/build_map.js"></script>
     <script type="text/javascript" src="/res/js/func_get_human_time.js"></script>
     <script type="text/javascript" src="/res/js/func_update_date_delta.js"></script>
     ${page_head}
@@ -12,10 +15,8 @@
 
 <body>
     
-    <iframe 
-        id="osm-frame"
-        src="${osm_frame_src}">
-    </iframe>
+    <div id="map"></div>
+    ${map_init_script}
     
     <a id="reload" href="">Actualiser</a>
 
