@@ -40,7 +40,7 @@ def build_map_page(data, auto_reload=None, zoom=None):
 
     if not zoom:
         if 'eda' in data and data['eda'] > 0:
-            position.dist_to_zoom(data['eda'])
+            zoom = position.dist_to_zoom(data['eda'])
         else:
             zoom = 14
 
