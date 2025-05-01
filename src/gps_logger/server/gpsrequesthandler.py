@@ -10,6 +10,7 @@ from ..utils import logging
 from .web     import device_map
 from .web     import web
 from .web.resources import resources
+from .api import api
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +54,15 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
             except PermissionError:
                 self.send_response_page(http.HTTPStatus.UNAUTHORIZED)
             else:
-                url_parse = urllib.parse.urlparse(self.path)
-                data = urllib.parse.parse_qs(url_parse.query)
-                api_path = url_parse.path.removeprefix("/api/")
+                api_path = self.path.removeprefix("/api/")
+                if api_path.startswith("post/"):
+                    api_path = api_path.removeprefix("post/")
+                    url_parse = urllib.parse.urlparse(api_path)
+                    data = urllib.parse.parse_qs(url_parse.query)
 
-                self.save_data(api_path, data)
+                    self.post_api(url_parse.path, data)
+                else:
+                    self.get_api(api_path)
         elif self.path.startswith("/web/"):
             try:
                 self.check_api_auth()
@@ -95,7 +100,7 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
                 data = urllib.parse.parse_qs(raw_data)
                 api_path = url_parse.path.removeprefix("/api/")
 
-                self.save_data(api_path, data)
+                self.post_api(api_path, data)
         else:
             self.send_response_page(http.HTTPStatus.NOT_FOUND)
 
@@ -140,10 +145,22 @@ class GPSRequestHandler(http.server.BaseHTTPRequestHandler):
             else:
                 self.send_response_page(http.HTTPStatus.NOT_FOUND)
 
-    def save_data(self, path, data):
+    def get_api(self, path):
+        try:
+            data = api.get(path)
+        except Exception as e:
+            logger.error(f"Get page {type(e)}: {e}")
+            self.send_response_page(http.HTTPStatus.INTERNAL_SERVER_ERROR)
+        else:
+            self.send_response(http.HTTPStatus.OK)
+            self.send_header("Content-type", "text/json")
+            self.end_headers()
+            self.send_data(data.encode("utf-8"))
+
+    def post_api(self, path, data):
 
         try:
-            output.save(path, data)
+            api.post(path, data)
         except ValueError as e:
             logger.error(f"Save {type(e)}: {e}")
             self.send_response_page(http.HTTPStatus.BAD_REQUEST)

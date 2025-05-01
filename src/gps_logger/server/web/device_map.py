@@ -63,10 +63,12 @@ def build_widget_zone(data):
 
     return out_str
 
-def build_widget_elem(icon_name, text, text_attrs={}, img_attrs={}):
+def build_widget_elem(widget_id, icon_name, text, text_attrs={}, img_attrs={}):
 
     text_attrs = text_attrs.copy()
     img_attrs  = img_attrs.copy()
+
+    text_attrs['id'] = [widget_id]
 
     if 'class' in text_attrs:
         text_attrs['class'].append("widget-text")
@@ -112,11 +114,11 @@ def build_widget_position(data):
 
     geo_link = f"geo:{data['lat']:06},{data['lon']:06}"
 
-    out_str  = f'<a href="{geo_link}">\n'
+    out_str  = f'<a id="geolink" href="{geo_link}">\n'
     out_str += '<div class="widget">\n'
 
-    out_str += build_widget_elem(lat_icon_name, f"{lat_str}")
-    out_str += build_widget_elem(lon_icon_name, f"{lon_str}")
+    out_str += build_widget_elem("widget-lat", lat_icon_name, f"{lat_str}")
+    out_str += build_widget_elem("widget-lon", lon_icon_name, f"{lon_str}")
 
     out_str += '</div>\n'
     out_str += '</a>\n'
@@ -131,19 +133,19 @@ def build_widget_aux_nav(data):
     if 'ele' in data:
         icon = "img/widget_altitude_day.svg"
         text = f"{int(data['ele'])} m"
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-ele", icon, text)
         is_empty = False
 
     if 'dir' in data:
         icon = "img/widget_bearing_day.svg"
         text = f"{int(data['dir'])}&deg;"
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-dir", icon, text)
         is_empty = False
 
     if 'spd' in data:
         icon = "img/widget_speed_day.svg"
         text = f"{int(data['spd'] * 3.6)} km/h"
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-spd", icon, text)
         is_empty = False
 
     out_str += '</div>\n'
@@ -162,11 +164,11 @@ def build_widget_datetime(data):
 
     icon = "img/widget_time_day.svg"
     text = dateutils.get_adaptatif_str(data['timestamp'], data['lat'], data['lon'])
-    out_str += build_widget_elem(icon, text)
+    out_str += build_widget_elem("widget-date", icon, text)
 
     icon = "img/widget_track_recording_duration_day.svg"
     text = dateutils.get_delta_str(data['timestamp'])
-    out_str += build_widget_elem(icon, text, text_attrs={
+    out_str += build_widget_elem("widget-timedelta", icon, text, text_attrs={
         "class": ["date-delta"], 
         "isodate": [f"{dateutils.timestamp_to_iso(data['timestamp'])}"]
     })
@@ -200,15 +202,15 @@ def build_target(data, type):
     if type == "intermediate":
         icon = "img/widget_intermediate_day.svg"
         text = position.dist_human(data['edfa'])
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-inter-dist", icon, text)
 
         icon = "img/widget_intermediate_time_day.svg"
         text = dateutils.get_adaptatif_str(data['etfa'], data['lat'], data['lon'])
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-inter-date", icon, text)
 
         icon = "img/widget_intermediate_time_to_go_day.svg"
         text = dateutils.get_delta_str(data['etfa'])
-        out_str += build_widget_elem(icon, text, text_attrs={
+        out_str += build_widget_elem("widget-inter-timedelta", icon, text, text_attrs={
             "class": ["date-delta"], 
             "isodate": [f"{dateutils.timestamp_to_iso(data['etfa'])}"]
         })
@@ -216,15 +218,15 @@ def build_target(data, type):
     elif type == "final":
         icon = "img/widget_target_day.svg"
         text = position.dist_human(data['eda'])
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-final-dist", icon, text)
 
         icon = "img/widget_time_to_distance_day.svg"
         text = dateutils.get_adaptatif_str(data['eta'], data['lat'], data['lon'])
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-final-date", icon, text)
 
         icon = "img/widget_destination_time_to_go_day.svg"
         text = dateutils.get_delta_str(data['eta'])
-        out_str += build_widget_elem(icon, text, text_attrs={
+        out_str += build_widget_elem("widget-final-timedelta", icon, text, text_attrs={
             "class": ["date-delta"], 
             "isodate": [f"{dateutils.timestamp_to_iso(data['eta'])}"]
         })
@@ -242,12 +244,12 @@ def build_technics(data):
     if 'sat' in data:
         icon = "img/widget_gps_info_day.svg"
         text = f"{int(data['sat'])} sat"
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-sat", icon, text)
 
     if 'acc' in data:
         icon = "img/widget_ruler_circle_day.svg"
         text = f"{int(data['acc'])} m"
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-acc", icon, text)
 
     if 'batt' in data:
         if 'ischarging' in data and data['ischarging']:
@@ -255,7 +257,7 @@ def build_technics(data):
         else:
             icon = "img/widget_battery_day.svg"
         text = f"{int(data['batt'])} %"
-        out_str += build_widget_elem(icon, text)
+        out_str += build_widget_elem("widget-batt", icon, text)
 
     out_str += '</div>\n'
     return out_str

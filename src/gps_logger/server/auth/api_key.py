@@ -7,6 +7,7 @@ import os.path
 import time
 import datetime
 import pathlib
+import re
 
 def api_keys_type(path):
     return ApiKey(path)
@@ -45,7 +46,8 @@ class ApiKey():
             data_object['name'] = name
 
         if path:
-            data_object['path'] = str(path)
+            data_object['path'] = [str(path)]
+
 
         if expire_date:
             data_object['expire-date'] = expire_date
@@ -70,7 +72,18 @@ class ApiKey():
             if api_key['hash'] == key_hash:
 
                 if path and 'path' in api_key:
-                    if not path.startswith(api_key['path']):
+                    path_in_list = False
+
+                    if type(api_key['path']) == str:
+                        path_list = [api_key['path']]
+                    else:
+                        path_list = api_key['path']
+
+                    for check_path in path_list:
+                        if re.search(check_path, path):
+                            path_in_list = True
+                            break
+                    if path_in_list == False:
                         return (False, None)
 
                 if 'expire-date' in api_key:

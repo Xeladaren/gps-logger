@@ -10,6 +10,8 @@
     <script src="/res/js/build_map.js"></script>
     <script type="text/javascript" src="/res/js/func_get_human_time.js"></script>
     <script type="text/javascript" src="/res/js/func_update_date_delta.js"></script>
+    <script type="text/javascript" src="/res/js/update_widget.js"></script>
+    <script type="text/javascript" src="/res/js/update_map.js"></script>
     ${page_head}
 </head>
 
@@ -18,14 +20,18 @@
     <div id="map"></div>
     ${map_init_script}
     
-    <a id="reload" href="">Actualiser</a>
+    <!-- <a id="reload" href="">Actualiser</a> -->
+    <dev id="reload">
+        <input id="follow-marker" type="checkbox">
+        <label for="follow-marker">Suivre</label>
+    </dev> 
 
     <div class="widget-zone">
         ${widget_zone}
     </div>
     <script>
-        update_date_delta();
-        setInterval(update_date_delta, 1000);
+        let api_url = get_api_url();
+        setInterval(get_api, 1000, api_url);
     </script>
 </body>
 

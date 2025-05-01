@@ -36,3 +36,26 @@ function get_human_time(time)
 
     return output_str
 }
+
+function pad(d) {
+    return (d < 10) ? '0' + d.toString() : d.toString();
+}
+
+function get_human_date(date)
+{
+    let now = new Date();
+    var output_string = "";
+
+    if(date.toDateString() != now.toDateString())
+    {
+        output_string += pad(date.getFullYear()) + "-";
+        output_string += pad(date.getMonth()+1) + "-";
+        output_string += pad(date.getDate()) + " ";
+    }
+
+    output_string += pad(date.getHours()) + ":";
+    output_string += pad(date.getMinutes()) + ":";
+    output_string += pad(date.getSeconds());
+
+    return output_string;
+}

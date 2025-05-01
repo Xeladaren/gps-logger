@@ -1,7 +1,11 @@
 
+var marker;
+var map;
+var path;
+
 function build_map(pos, zoom, pres)
 {
-    var map = L.map('map')
+    map = L.map('map')
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', 
     {
@@ -11,9 +15,23 @@ function build_map(pos, zoom, pres)
 
     map.setView(pos, zoom);
 
-    var marker = L.marker(pos).addTo(map);
+    marker = L.marker(pos).addTo(map);
+    path   = L.polyline([], {color: 'red', opacity: 0.3}).addTo(map);
+    path.addLatLng(pos);
     if(pres > 0)
     {
         var cyrcle_pres = L.circle(pos, {radius: pres}).addTo(map);
+    }
+}
+
+function update_marker(pos)
+{
+    let follow_checkbox = document.getElementById("follow-marker");
+    marker.setLatLng(pos);
+    path.addLatLng(pos);
+
+    if(follow_checkbox.checked)
+    {
+        map.panTo(pos);
     }
 }
