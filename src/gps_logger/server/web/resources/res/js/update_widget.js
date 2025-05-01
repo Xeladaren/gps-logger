@@ -97,7 +97,7 @@ function update_sat(data)
 
     if(widget_node)
     {
-        let value = Math.round(data.sat);
+        let value = Math.round(data.sat) + " sat";
         // console.log("Sat : ", value);
         widget_node.innerHTML = value
     }
